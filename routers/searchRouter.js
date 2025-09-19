@@ -38,7 +38,7 @@ async function searchNews(keyword, category = null) {
           })));
         }
       } else {
-        // JSON API source
+        // JSON API source 
         for (const cat of source.categories) {
           if (category && cat.id !== category) continue;
           

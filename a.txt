@@ -754,4 +754,4 @@ sample data xmlnya:
 <![CDATA[ Akmal Fauzi ]]>
 </dc:creator>
 <pubDate>Fri, 19 Sep 2025 20:32:00 +0700</pubDate>
-</item>
+</item> a
