@@ -38,14 +38,14 @@ const rssSources = [
   },
 
   // Sindo News
-  {
-    id: 'sindonews',
-    name: 'SINDOnews',
-    icon_url: 'https://play-lh.googleusercontent.com/LSgpGO8zgGhnCxTTqJt-LDkOLN97Qc4JPsOZUbnnOjaMY9bP1M3_a3jmW9yt8M00EcM',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.sindonews.com/feed' }
-    ]
-  },
+  // {
+  //   id: 'sindonews',
+  //   name: 'SINDOnews',
+  //   icon_url: 'https://play-lh.googleusercontent.com/LSgpGO8zgGhnCxTTqJt-LDkOLN97Qc4JPsOZUbnnOjaMY9bP1M3_a3jmW9yt8M00EcM',
+  //   categories: [
+  //     { id: 'terkini', name: 'Berita Terkini', url: 'https://www.sindonews.com/feed' }
+  //   ]
+  // },
 
   // VIVA News
   {
@@ -167,21 +167,21 @@ const jsonApiSources = [
       { id: 'leisure', name: 'Leisure' }
     ]
   },
-  {
-    id: "okezone",
-    name: "Okezone",
-    url: "https://berita-indo-api-next.vercel.app/api/okezone-news",
-    icon_url: "https://play-lh.googleusercontent.com/MmKQ-EDZqITAHovSHtJtze7Td9ii4M8sGapowXPqhQsv3qb8ooLwkiRBobAnHHCvNJI1",
-    categories: [
-      { id: 'breaking', name: 'Breaking' },
-      { id: 'sport', name: 'Sport' },
-      { id: 'economy', name: 'Economy' },
-      { id: 'lifestyle', name: 'Lifestyle' },
-      { id: 'celebrity', name: 'Celebrity' },
-      { id: 'bola', name: 'Bola' },
-      { id: 'techno', name: 'Techno' }
-    ]
-  }
+  // {
+  //   id: "okezone",
+  //   name: "Okezone",
+  //   url: "https://berita-indo-api-next.vercel.app/api/okezone-news",
+  //   icon_url: "https://play-lh.googleusercontent.com/MmKQ-EDZqITAHovSHtJtze7Td9ii4M8sGapowXPqhQsv3qb8ooLwkiRBobAnHHCvNJI1",
+  //   categories: [
+  //     { id: 'breaking', name: 'Breaking' },
+  //     { id: 'sport', name: 'Sport' },
+  //     { id: 'economy', name: 'Economy' },
+  //     { id: 'lifestyle', name: 'Lifestyle' },
+  //     { id: 'celebrity', name: 'Celebrity' },
+  //     { id: 'bola', name: 'Bola' },
+  //     { id: 'techno', name: 'Techno' }
+  //   ]
+  // }
 ];
 
 const formatDate = (date) => {
