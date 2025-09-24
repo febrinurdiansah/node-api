@@ -189,7 +189,7 @@ const formatDate = (date) => {
   const dateData = new Date(date);
   const differenceSecond = Math.floor((now - dateData) / 1000);
 
-  if (differenceSecond < 60) return 'beberapa detik yang lalu';
+  if (differenceSecond < 60) return 'baru saja';
   if (differenceSecond < 3600) return `${Math.floor(differenceSecond / 60)} menit yang lalu`;
   if (differenceSecond < 86400) return `${Math.floor(differenceSecond / 3600)} jam yang lalu`;
   return `${Math.floor(differenceSecond / (3600 * 24))} hari yang lalu`;
@@ -280,8 +280,23 @@ const parseAntaraItem = (item) => {
 };
 
 const parseSindoItem = (item) => {
-  const imageMatch = item.description?.match(/<img[^>]+src="([^">]+)"/);
-  const imageUrl = imageMatch ? imageMatch[1] : '';
+  let imageUrl = '';
+  
+  // Method 1: Dari media:content
+  if (item['media:content'] && item['media:content'].$) {
+    imageUrl = item['media:content'].$.url || '';
+  }
+  
+  // Method 2: Dari enclosure
+  if (!imageUrl && item.enclosure && item.enclosure.$) {
+    imageUrl = item.enclosure.$.url || '';
+  }
+  
+  // Method 3: Parse dari description
+  if (!imageUrl && item.description) {
+    const imageMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+    imageUrl = imageMatch ? imageMatch[1] : '';
+  }
   
   return {
     id: item.idnews || `sindo-${Date.now()}-${Math.random()}`,
@@ -384,28 +399,90 @@ const parseDefaultRSSItem = (item) => {
 
 // Helper functions
 const extractImageFromBBC = (item) => {
-  if (item.link && item.link.media) {
-    const media = item.link.media;
-    if (media.thumbnail && media.thumbnail.url) {
-      return media.thumbnail.url;
-    } else if (media.content && media.content.thumbnail && media.content.thumbnail.url) {
-      return media.content.thumbnail.url;
+  if (item.link && item.link['media:content'] && item.link['media:content']['media:thumbnail']) {
+    const thumbnails = item.link['media:content']['media:thumbnail'];
+    
+    if (Array.isArray(thumbnails)) {
+      const largestThumbnail = thumbnails.reduce((largest, current) => {
+        const currentWidth = parseInt(current.width || current.$.width || 0);
+        const largestWidth = parseInt(largest.width || largest.$.width || 0);
+        return currentWidth > largestWidth ? current : largest;
+      });
+      
+      return largestThumbnail.url || largestThumbnail.$.url || '';
+    } else {
+      return thumbnails.url || thumbnails.$.url || '';
     }
   }
+  
+  if (item.link) {
+    let linkToCheck = item.link;
+    if (Array.isArray(item.link)) {
+      linkToCheck = item.link.find(link => 
+        link['media:content'] && link['media:content']['media:thumbnail']
+      );
+      
+      if (linkToCheck && linkToCheck['media:content'] && linkToCheck['media:content']['media:thumbnail']) {
+        const thumbnails = linkToCheck['media:content']['media:thumbnail'];
+        
+        if (Array.isArray(thumbnails)) {
+          const largestThumbnail = thumbnails.reduce((largest, current) => {
+            const currentWidth = parseInt(current.width || current.$.width || 0);
+            const largestWidth = parseInt(largest.width || largest.$.width || 0);
+            return currentWidth > largestWidth ? current : largest;
+          });
+          return largestThumbnail.url || largestThumbnail.$.url || '';
+        } else {
+          return thumbnails.url || thumbnails.$.url || '';
+        }
+      }
+    }
+  }
+  
+  if (item['media:content'] && item['media:content']['media:thumbnail']) {
+    const thumbnails = item['media:content']['media:thumbnail'];
+    
+    if (Array.isArray(thumbnails)) {
+      const largestThumbnail = thumbnails.reduce((largest, current) => {
+        const currentWidth = parseInt(current.width || current.$.width || 0);
+        const largestWidth = parseInt(largest.width || largest.$.width || 0);
+        return currentWidth > largestWidth ? current : largest;
+      });
+      return largestThumbnail.url || largestThumbnail.$.url || '';
+    } else {
+      return thumbnails.url || thumbnails.$.url || '';
+    }
+  }
+  
+  if (item.summary) {
+    const summaryText = item.summary?._ || item.summary;
+    const imageMatch = summaryText.match(/<img[^>]+src="([^">]+)"/);
+    if (imageMatch) {
+      return imageMatch[1];
+    }
+  }
+  
   return '';
 };
 
 const extractLinkFromBBC = (item) => {
   if (item.link) {
     if (Array.isArray(item.link)) {
-      const alternateLink = item.link.find(link => link.rel === 'alternate');
-      return alternateLink?.href || '';
+      // Cari link dengan rel="alternate" dan type="text/html"
+      const alternateLink = item.link.find(link => 
+        link.rel === 'alternate' && 
+        (link.type === 'text/html' || !link.type)
+      );
+      return alternateLink?.href || item.link[0]?.href || '';
     } else if (item.link.href) {
       return item.link.href;
+    } else if (typeof item.link === 'string') {
+      return item.link;
     }
   }
   return '';
 };
+
 
 const extractImageFromAntara = (item) => {
   if (item.enclosure && item.enclosure.url) {
