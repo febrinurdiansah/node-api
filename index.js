@@ -67,12 +67,16 @@ app.get('/:source/kategori', async (req, res) => {
     const categories = getSourceCategories(source);
     
     if (categories.length === 0) {
-      return res.status(404).json({ error: "Source not found or no categories available" });
+      return res.status(404).json({ 
+        error: "Source not found or no categories available",
+        source: source
+      });
     }
     
     res.json({
       source: source,
-      categories: categories
+      categories: categories,
+      total: categories.length
     });
   } catch (error) {
     console.error(`Error fetching categories for ${req.params.source}:`, error);

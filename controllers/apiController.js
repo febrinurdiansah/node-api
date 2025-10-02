@@ -1,125 +1,6 @@
 const axios = require('axios');
 const xml2js = require('xml2js');
 
-// Konfigurasi semua sumber RSS
-const rssSources = [
-  // BBC Indonesia - berbagai kategori
-  {
-    id: 'bbc',
-    name: 'BBC Indonesia',
-    icon_url: 'https://www.bbc.co.uk/indonesia/images/gel/rss_logo.gif',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'http://www.bbc.co.uk/indonesia/index.xml' },
-      { id: 'dunia', name: 'Berita Dunia', url: 'http://www.bbc.co.uk/indonesia/dunia/index.xml' },
-      { id: 'indonesia', name: 'Berita Indonesia', url: 'http://www.bbc.co.uk/indonesia/berita_indonesia/index.xml' },
-      { id: 'olahraga', name: 'Olahraga', url: 'http://www.bbc.co.uk/indonesia/olahraga/index.xml' },
-      { id: 'majalah', name: 'Majalah', url: 'http://www.bbc.co.uk/indonesia/majalah/index.xml' },
-      { id: 'bahasa_inggris', name: 'Bahasa Inggris', url: 'http://www.bbc.co.uk/indonesia/bahasa_inggris/index.xml' }
-    ]
-  },
-
-  // ANTARA News - berbagai kategori
-  {
-    id: 'antara',
-    name: 'ANTARA News',
-    icon_url: 'https://pbs.twimg.com/profile_images/1193345348573396992/Cd3dfZfq_400x400.jpg',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.antaranews.com/rss/terkini.xml' },
-      { id: 'top', name: 'Top News', url: 'https://www.antaranews.com/rss/top-news.xml' },
-      { id: 'politik', name: 'Politik', url: 'https://www.antaranews.com/rss/politik.xml' },
-      { id: 'hukum', name: 'Hukum', url: 'https://www.antaranews.com/rss/hukum.xml' },
-      { id: 'ekonomi', name: 'Ekonomi', url: 'https://www.antaranews.com/rss/ekonomi.xml' },
-      { id: 'metro', name: 'Metro', url: 'https://www.antaranews.com/rss/metro.xml' },
-      { id: 'olahraga', name: 'Olahraga', url: 'https://www.antaranews.com/rss/olahraga.xml' },
-      { id: 'humaniora', name: 'Humaniora', url: 'https://www.antaranews.com/rss/humaniora.xml' },
-      { id: 'hiburan', name: 'Hiburan', url: 'https://www.antaranews.com/rss/hiburan.xml' },
-      { id: 'tekno', name: 'Teknologi', url: 'https://www.antaranews.com/rss/tekno.xml' }
-    ]
-  },
-
-  // Sindo News
-  // {
-  //   id: 'sindonews',
-  //   name: 'SINDOnews',
-  //   icon_url: 'https://play-lh.googleusercontent.com/LSgpGO8zgGhnCxTTqJt-LDkOLN97Qc4JPsOZUbnnOjaMY9bP1M3_a3jmW9yt8M00EcM',
-  //   categories: [
-  //     { id: 'terkini', name: 'Berita Terkini', url: 'https://www.sindonews.com/feed' }
-  //   ]
-  // },
-
-  // VIVA News
-  {
-    id: 'viva',
-    name: 'VIVA News',
-    icon_url: 'https://www.viva.co.id/asset-viva/responsive-web/img/logo.png?v=2.101',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.viva.co.id/get/all' }
-    ]
-  },
-
-  // JPNN
-  {
-    id: 'jpnn',
-    name: 'JPNN',
-    icon_url: 'https://play-lh.googleusercontent.com/1523518470499205121/EJf01gIy_400x400.jpg',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.jpnn.com/index.php?mib=rss' }
-    ]
-  },
-
-  // FAJAR
-  {
-    id: 'fajar',
-    name: 'FAJAR',
-    icon_url: 'https://fajar.co.id/wp-content/uploads/2023/10/cropped-favicon-fajar-100x75.png',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://fajar.co.id/feed' }
-    ]
-  },
-
-  // WASPADA
-  {
-    id: 'waspada',
-    name: 'WASPADA',
-    icon_url: 'https://waspada.co.id/wp-content/uploads/2024/02/cropped-logo-WOL-W-saja-32x32.jpg',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://waspada.co.id/feed' }
-    ]
-  },
-
-  // Online24jam
-  {
-    id: 'online24jam',
-    name: 'Online24jam',
-    icon_url: 'https://online24jam.com/wp-content/uploads/2025/04/cropped-icon-32x32.png',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://online24jam.com/feed' }
-    ]
-  },
-
-  // Media Indonesia
-  {
-    id: 'mediaindonesia',
-    name: 'Media Indonesia',
-    icon_url: 'https://mediaindonesia.com/images/icon.jpg',
-    categories: [
-      { id: 'terkini', name: 'Berita Terkini', url: 'https://mediaindonesia.com/feed/all' }
-    ]
-  },
-
-  // KASKUS (forum)
-  {
-    id: 'kaskus',
-    name: 'KASKUS',
-    icon_url: 'https://www.kaskus.co.id/favicon.ico',
-    categories: [
-      { id: 'lounge', name: 'Lounge', url: 'http://www.kaskus.co.id/rss/forum/21' },
-      { id: 'berita_politik', name: 'Berita & Politik', url: 'http://www.kaskus.co.id/rss/forum/10' },
-      { id: 'games', name: 'Games', url: 'http://www.kaskus.co.id/rss/forum/44' }
-    ]
-  }
-];
-
 // Sumber JSON API (yang sudah ada)
 const jsonApiSources = [
   {
@@ -166,22 +47,126 @@ const jsonApiSources = [
       { id: 'sepakbola', name: 'Sepakbola' },
       { id: 'leisure', name: 'Leisure' }
     ]
+  }
+];
+
+// Konfigurasi semua sumber RSS
+const rssSources = [
+  // BBC Indonesia - berbagai kategori
+  {
+    id: 'bbc',
+    name: 'BBC Indonesia',
+    icon_url: 'https://images.icon-icons.com/70/PNG/512/bbc_news_14062.png',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'http://www.bbc.co.uk/indonesia/index.xml' },
+      { id: 'dunia', name: 'Berita Dunia', url: 'http://www.bbc.co.uk/indonesia/dunia/index.xml' },
+      { id: 'indonesia', name: 'Berita Indonesia', url: 'http://www.bbc.co.uk/indonesia/berita_indonesia/index.xml' },
+      { id: 'olahraga', name: 'Olahraga', url: 'http://www.bbc.co.uk/indonesia/olahraga/index.xml' },
+      { id: 'majalah', name: 'Majalah', url: 'http://www.bbc.co.uk/indonesia/majalah/index.xml' },
+      { id: 'bahasa_inggris', name: 'Bahasa Inggris', url: 'http://www.bbc.co.uk/indonesia/bahasa_inggris/index.xml' }
+    ]
   },
-  // {
-  //   id: "okezone",
-  //   name: "Okezone",
-  //   url: "https://berita-indo-api-next.vercel.app/api/okezone-news",
-  //   icon_url: "https://play-lh.googleusercontent.com/MmKQ-EDZqITAHovSHtJtze7Td9ii4M8sGapowXPqhQsv3qb8ooLwkiRBobAnHHCvNJI1",
-  //   categories: [
-  //     { id: 'breaking', name: 'Breaking' },
-  //     { id: 'sport', name: 'Sport' },
-  //     { id: 'economy', name: 'Economy' },
-  //     { id: 'lifestyle', name: 'Lifestyle' },
-  //     { id: 'celebrity', name: 'Celebrity' },
-  //     { id: 'bola', name: 'Bola' },
-  //     { id: 'techno', name: 'Techno' }
-  //   ]
-  // }
+
+  // ANTARA News - berbagai kategori
+  {
+    id: 'antara',
+    name: 'ANTARA',
+    icon_url: 'https://pbs.twimg.com/profile_images/1193345348573396992/Cd3dfZfq_400x400.jpg',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.antaranews.com/rss/terkini.xml' },
+      { id: 'top', name: 'Top News', url: 'https://www.antaranews.com/rss/top-news.xml' },
+      { id: 'politik', name: 'Politik', url: 'https://www.antaranews.com/rss/politik.xml' },
+      { id: 'hukum', name: 'Hukum', url: 'https://www.antaranews.com/rss/hukum.xml' },
+      { id: 'ekonomi', name: 'Ekonomi', url: 'https://www.antaranews.com/rss/ekonomi.xml' },
+      { id: 'metro', name: 'Metro', url: 'https://www.antaranews.com/rss/metro.xml' },
+      { id: 'olahraga', name: 'Olahraga', url: 'https://www.antaranews.com/rss/olahraga.xml' },
+      { id: 'humaniora', name: 'Humaniora', url: 'https://www.antaranews.com/rss/humaniora.xml' },
+      { id: 'hiburan', name: 'Hiburan', url: 'https://www.antaranews.com/rss/hiburan.xml' },
+      { id: 'tekno', name: 'Teknologi', url: 'https://www.antaranews.com/rss/tekno.xml' }
+    ]
+  },
+
+  // Sindo News
+  {
+    id: 'sindonews',
+    name: 'SINDO',
+    icon_url: 'https://play-lh.googleusercontent.com/LSgpGO8zgGhnCxTTqJt-LDkOLN97Qc4JPsOZUbnnOjaMY9bP1M3_a3jmW9yt8M00EcM',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.sindonews.com/feed' }
+    ]
+  },
+
+  // VIVA News
+  {
+    id: 'viva',
+    name: 'VIVA News',
+    icon_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwuWnbQVFpdl3VMhacyBnVHOXJ-aLAzXeeLg&s',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.viva.co.id/get/all' }
+    ]
+  },
+
+  // JPNN
+  {
+    id: 'jpnn',
+    name: 'JPNN',
+    icon_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAjJYgAholK5N2RTibLYgMn4hSUeiURW5jdQ&s',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://www.jpnn.com/index.php?mib=rss' }
+    ]
+  },
+
+  // FAJAR
+  {
+    id: 'fajar',
+    name: 'FAJAR',
+    icon_url: 'https://fajar.co.id/wp-content/uploads/2023/10/cropped-favicon-fajar-100x75.png',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://fajar.co.id/feed' }
+    ]
+  },
+
+  // WASPADA
+  {
+    id: 'waspada',
+    name: 'WASPADA',
+    icon_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4dWPdTCLYbBHwT8_QuvTRj6kw292z11Vz0A&s',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://waspada.co.id/feed' }
+    ]
+  },
+
+  // Online24jam
+  {
+    id: 'online24jam',
+    name: 'Online24jam',
+    icon_url: 'https://online24jam.com/wp-content/uploads/2024/01/cropped-site-logos.png',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://online24jam.com/feed' }
+    ]
+  },
+
+  // Media Indonesia
+  {
+    id: 'mediaindonesia',
+    name: 'Media Indonesia',
+    icon_url: 'https://media.licdn.com/dms/image/v2/C510BAQF9EkKZjSUjVg/company-logo_200_200/company-logo_200_200/0/1631316131244?e=2147483647&v=beta&t=hYTg9Ma9GomMkpgIzRLmIOB8UXuLd9BvFkA10Og7APg',
+    categories: [
+      { id: 'terkini', name: 'Berita Terkini', url: 'https://mediaindonesia.com/feed/all' }
+    ]
+  },
+
+  // KASKUS (forum)
+  {
+    id: 'kaskus',
+    name: 'KASKUS',
+    icon_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEycYfK2vfOUQydhfgV_t75myOOLa2CcSwSA&s',
+    categories: [
+      { id: 'lounge', name: 'Lounge', url: 'http://www.kaskus.co.id/rss/forum/21' },
+      { id: 'berita_politik', name: 'Berita & Politik', url: 'http://www.kaskus.co.id/rss/forum/10' },
+      { id: 'games', name: 'Games', url: 'http://www.kaskus.co.id/rss/forum/44' }
+    ]
+  }
 ];
 
 const formatDate = (date) => {
@@ -189,16 +174,35 @@ const formatDate = (date) => {
   const dateData = new Date(date);
   const differenceSecond = Math.floor((now - dateData) / 1000);
 
-  if (differenceSecond < 60) return 'baru saja';
+  if (differenceSecond < 60) return 'Baru saja';
   if (differenceSecond < 3600) return `${Math.floor(differenceSecond / 60)} menit yang lalu`;
   if (differenceSecond < 86400) return `${Math.floor(differenceSecond / 3600)} jam yang lalu`;
   return `${Math.floor(differenceSecond / (3600 * 24))} hari yang lalu`;
 };
 
+// Helper functions
+const extractTextFromCDATA = (text) => {
+  if (!text) return '';
+  // Remove CDATA tags and HTML tags
+  return text.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
+             .replace(/<[^>]*>/g, '')
+             .trim();
+};
+
+const extractImageFromDescription = (description) => {
+  if (!description) return '';
+  const imageMatch = description.match(/<img[^>]+src="([^">]+)"/);
+  return imageMatch ? imageMatch[1] : '';
+};
+
 // Parser untuk berbagai format RSS
 const parseRSS = async (xmlData, sourceType = 'default') => {
   try {
-    const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true });
+    const parser = new xml2js.Parser({ 
+      explicitArray: false, 
+      mergeAttrs: true,
+      ignoreAttrs: false
+    });
     const result = await parser.parseStringPromise(xmlData);
     
     let items = [];
@@ -210,35 +214,35 @@ const parseRSS = async (xmlData, sourceType = 'default') => {
         
       case 'antara':
         items = result.rss?.channel?.item || [];
-        return items.map(parseAntaraItem);
+        return Array.isArray(items) ? items.map(parseAntaraItem) : [parseAntaraItem(items)];
         
       case 'sindonews':
         items = result.rss?.channel?.item || [];
-        return items.map(parseSindoItem);
+        return Array.isArray(items) ? items.map(parseSindoItem) : [parseSindoItem(items)];
         
       case 'viva':
         items = result.rss?.channel?.item || [];
-        return items.map(parseVivaItem);
+        return Array.isArray(items) ? items.map(parseVivaItem) : [parseVivaItem(items)];
         
       case 'jpnn':
         items = result.rss?.channel?.item || [];
-        return items.map(parseJpnnItem);
+        return Array.isArray(items) ? items.map(parseJpnnItem) : [parseJpnnItem(items)];
         
       case 'wordpress': // Untuk FAJAR, WASPADA, Online24jam
         items = result.rss?.channel?.item || [];
-        return items.map(parseWordpressItem);
+        return Array.isArray(items) ? items.map(parseWordpressItem) : [parseWordpressItem(items)];
         
       case 'mediaindonesia':
         items = result.rss?.channel?.item || [];
-        return items.map(parseMediaIndonesiaItem);
+        return Array.isArray(items) ? items.map(parseMediaIndonesiaItem) : [parseMediaIndonesiaItem(items)];
         
       case 'kaskus':
         items = result.rss?.channel?.item || [];
-        return items.map(parseKaskusItem);
+        return Array.isArray(items) ? items.map(parseKaskusItem) : [parseKaskusItem(items)];
         
       default:
         items = result.rss?.channel?.item || [];
-        return items.map(parseDefaultRSSItem);
+        return Array.isArray(items) ? items.map(parseDefaultRSSItem) : [parseDefaultRSSItem(items)];
     }
   } catch (error) {
     console.error('Error parsing RSS:', error);
@@ -265,10 +269,20 @@ const parseBBCItem = (item) => {
 };
 
 const parseAntaraItem = (item) => {
-  const imageUrl = extractImageFromAntara(item);
+  let imageUrl = '';
+  
+  // Method 1: Dari enclosure
+  if (item.enclosure && (item.enclosure.url || item.enclosure.$?.url)) {
+    imageUrl = item.enclosure.url || item.enclosure.$?.url;
+  }
+  
+  // Method 2: Dari description
+  if (!imageUrl && item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
   
   return {
-    id: item.guid || `antara-${Date.now()}-${Math.random()}`,
+    id: item.guid?.$?._ || item.guid || `antara-${Date.now()}-${Math.random()}`,
     title: item.title || 'No title',
     summary: extractTextFromCDATA(item.description) || '',
     link: item.link,
@@ -282,24 +296,31 @@ const parseAntaraItem = (item) => {
 const parseSindoItem = (item) => {
   let imageUrl = '';
   
-  // Method 1: Dari media:content
-  if (item['media:content'] && item['media:content'].$) {
-    imageUrl = item['media:content'].$.url || '';
+  // Method 1: Dari media:content (yang paling akurat untuk SindoNews)
+  if (item['media:content']) {
+    if (item['media:content'].url) {
+      imageUrl = item['media:content'].url;
+    } else if (item['media:content'].$?.url) {
+      imageUrl = item['media:content'].$?.url;
+    }
   }
   
-  // Method 2: Dari enclosure
-  if (!imageUrl && item.enclosure && item.enclosure.$) {
-    imageUrl = item.enclosure.$.url || '';
+  // Method 2: Dari enclosure sebagai fallback
+  if (!imageUrl && item.enclosure) {
+    if (item.enclosure.url) {
+      imageUrl = item.enclosure.url;
+    } else if (item.enclosure.$?.url) {
+      imageUrl = item.enclosure.$?.url;
+    }
   }
   
-  // Method 3: Parse dari description
+  // Method 3: Parse dari description sebagai fallback terakhir
   if (!imageUrl && item.description) {
-    const imageMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
-    imageUrl = imageMatch ? imageMatch[1] : '';
+    imageUrl = extractImageFromDescription(item.description);
   }
   
   return {
-    id: item.idnews || `sindo-${Date.now()}-${Math.random()}`,
+    id: item.idnews || item.guid || `sindo-${Date.now()}-${Math.random()}`,
     title: item.title || 'No title',
     summary: extractTextFromCDATA(item.description) || '',
     link: item.link,
@@ -311,8 +332,17 @@ const parseSindoItem = (item) => {
 };
 
 const parseVivaItem = (item) => {
-  const imageMatch = item.description?.match(/<img[^>]+src="([^">]+)"/);
-  const imageUrl = imageMatch ? imageMatch[1] : '';
+  let imageUrl = '';
+  
+  // Method 1: Dari description
+  if (item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
+  
+  // Method 2: Dari enclosure
+  if (!imageUrl && item.enclosure && item.enclosure.url) {
+    imageUrl = item.enclosure.url;
+  }
   
   return {
     id: item.guid || `viva-${Date.now()}-${Math.random()}`,
@@ -327,8 +357,17 @@ const parseVivaItem = (item) => {
 };
 
 const parseJpnnItem = (item) => {
-  const imageMatch = item.description?.match(/<img[^>]+src="([^">]+)"/);
-  const imageUrl = imageMatch ? imageMatch[1] : (item.enclosure?.url || '');
+  let imageUrl = '';
+  
+  // Method 1: Dari description
+  if (item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
+  
+  // Method 2: Dari enclosure
+  if (!imageUrl && item.enclosure && item.enclosure.url) {
+    imageUrl = item.enclosure.url;
+  }
   
   return {
     id: item.guid || `jpnn-${Date.now()}-${Math.random()}`,
@@ -343,12 +382,24 @@ const parseJpnnItem = (item) => {
 };
 
 const parseWordpressItem = (item) => {
+  let imageUrl = '';
+  
+  // Method 1: Dari description
+  if (item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
+  
+  // Method 2: Dari enclosure
+  if (!imageUrl && item.enclosure && item.enclosure.url) {
+    imageUrl = item.enclosure.url;
+  }
+  
   return {
     id: item.guid || `wp-${Date.now()}-${Math.random()}`,
     title: item.title || 'No title',
     summary: extractTextFromCDATA(item.description) || '',
     link: item.link,
-    image: '',
+    image: imageUrl,
     published: item.pubDate,
     isoDate: item.pubDate,
     timestamp: new Date(item.pubDate).getTime()
@@ -356,12 +407,24 @@ const parseWordpressItem = (item) => {
 };
 
 const parseMediaIndonesiaItem = (item) => {
+  let imageUrl = '';
+  
+  // Method 1: Dari description
+  if (item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
+  
+  // Method 2: Dari enclosure
+  if (!imageUrl && item.enclosure && item.enclosure.url) {
+    imageUrl = item.enclosure.url;
+  }
+  
   return {
     id: item.guid || `mediaindonesia-${Date.now()}-${Math.random()}`,
     title: extractTextFromCDATA(item.title) || 'No title',
     summary: extractTextFromCDATA(item.description) || '',
     link: item.link,
-    image: '',
+    image: imageUrl,
     published: item.pubDate,
     isoDate: item.pubDate,
     timestamp: new Date(item.pubDate).getTime()
@@ -385,19 +448,30 @@ const parseKaskusItem = (item) => {
 };
 
 const parseDefaultRSSItem = (item) => {
+  let imageUrl = '';
+  
+  // Method 1: Dari enclosure
+  if (item.enclosure && item.enclosure.url) {
+    imageUrl = item.enclosure.url;
+  }
+  
+  // Method 2: Dari description
+  if (!imageUrl && item.description) {
+    imageUrl = extractImageFromDescription(item.description);
+  }
+  
   return {
     id: item.guid || `rss-${Date.now()}-${Math.random()}`,
     title: item.title || 'No title',
     summary: extractTextFromCDATA(item.description) || '',
     link: item.link,
-    image: item.enclosure?.url || '',
+    image: imageUrl,
     published: item.pubDate,
     isoDate: item.pubDate,
     timestamp: new Date(item.pubDate).getTime()
   };
 };
 
-// Helper functions
 const extractImageFromBBC = (item) => {
   if (item.link && item.link['media:content'] && item.link['media:content']['media:thumbnail']) {
     const thumbnails = item.link['media:content']['media:thumbnail'];
@@ -483,24 +557,6 @@ const extractLinkFromBBC = (item) => {
   return '';
 };
 
-
-const extractImageFromAntara = (item) => {
-  if (item.enclosure && item.enclosure.url) {
-    return item.enclosure.url;
-  }
-  
-  const imageMatch = item.description?.match(/<img[^>]+src="([^">]+)"/);
-  return imageMatch ? imageMatch[1] : '';
-};
-
-const extractTextFromCDATA = (text) => {
-  if (!text) return '';
-  // Remove CDATA tags and HTML tags
-  return text.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
-             .replace(/<[^>]*>/g, '')
-             .trim();
-};
-
 // Fungsi untuk fetch RSS
 const fetchRSSFeed = async (url, sourceType = 'default') => {
   try {
@@ -565,7 +621,8 @@ const fetchAllRSSNews = async () => {
                 source: source.id,
                 name: source.name,
                 icon_url: source.icon_url,
-                category: category.id
+                category: category.id,
+                date: formatDate(article.published) // Pastikan format date konsisten
               });
             });
           })
@@ -614,16 +671,16 @@ const fetchFromAPIs = async () => {
     fetchTrendingFromNewsData()
   ]);
 
-  // Gabungkan semua artikel
+  // Gabungkan semua artikel RSS
   if (rssArticles.status === 'fulfilled') {
     rssArticles.value.forEach(article => {
       mergedData.merger_api.push({
         id: article.id,
         name: article.name,
         title: article.title,
-        date: formatDate(article.published),
+        date: article.date, // Sudah diformat di fetchAllRSSNews
         link: article.link,
-        image: article.image,
+        image: article.image || '', // Pastikan tidak null
         icon_url: article.icon_url,
         timestamp: article.timestamp,
         source: article.source
@@ -631,10 +688,12 @@ const fetchFromAPIs = async () => {
     });
   }
 
+  // Gabungkan artikel JSON API
   if (jsonArticles.status === 'fulfilled') {
     mergedData.merger_api.push(...jsonArticles.value);
   }
 
+  // Gabungkan trending data
   if (trendingData.status === 'fulfilled' && trendingData.value.length > 0) {
     trendingData.value.forEach(item => {
       mergedData.merger_api.push({
@@ -643,8 +702,8 @@ const fetchFromAPIs = async () => {
         title: item.title,
         date: item.date,
         link: item.url,
-        image: item.thumbnail,
-        icon_url: item.sourceIcon,
+        image: item.thumbnail || '',
+        icon_url: item.sourceIcon || '',
         timestamp: item.timestamp,
         source: 'trending'
       });
@@ -672,9 +731,9 @@ const fetchTrendingFromNewsData = async () => {
         date: formatDate(pubDate), 
         timestamp: pubDate.getTime(), 
         url: item.link, 
-        thumbnail: item.image_url,
+        thumbnail: item.image_url || '',
         source: item.source_name, 
-        sourceIcon: item.source_icon, 
+        sourceIcon: item.source_icon || '', 
       };
     });
 
@@ -704,7 +763,8 @@ const fetchNewsFromSource = async (sourceId, categoryId = null) => {
         source: source.id,
         name: source.name,
         icon_url: source.icon_url,
-        category: category.id
+        category: category.id,
+        date: formatDate(article.published)
       })));
     }
   } else {
